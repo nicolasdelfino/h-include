@@ -1,5 +1,6 @@
 const path = require('path');
 const fs = require('fs');
+const base = require('../lib/h-include-utils')
 
 const expect = require('expect');
 const { Builder, By, Key, until } = require('selenium-webdriver');
@@ -73,303 +74,310 @@ browsers.forEach(browser => {
       }
     });
 
-    it('includes basic case', async () => {
-      await driver.get('http://localhost:8080/static/basic/');
-      const aSelector = By.id('included-1');
-      const bSelector = By.id('included-2');
+    it('imports something', async () => {
+      var res = base.hInclude.utils.test();
+      console.log('res', res);
 
-      await driver.wait(until.elementLocated(aSelector), timeout);
-      const a = await driver.findElement(By.id('included-1'));
-
-      await driver.wait(until.elementLocated(By.id('included-2')), timeout);
-      const b = await driver.findElement(bSelector);
-
-      const aText = await a.getText();
-      const bText = await b.getText();
-
-      expect(aText).toBe('this text is included');
-      expect(bText).toBe('this text overwrote what was just there');
+      expect(res).toBe('test function');
     });
 
-    it('includes basic async case', async () => {
-      await driver.get('http://localhost:8080/static/basic-async/');
-      const aSelector = By.id('included-1');
-      const bSelector = By.id('included-2');
+    // it('includes basic case', async () => {
+    //   await driver.get('http://localhost:8080/static/basic/');
+    //   const aSelector = By.id('included-1');
+    //   const bSelector = By.id('included-2');
 
-      await driver.wait(until.elementLocated(aSelector), timeout);
-      const a = await driver.findElement(aSelector);
+    //   await driver.wait(until.elementLocated(aSelector), timeout);
+    //   const a = await driver.findElement(By.id('included-1'));
 
-      await driver.wait(until.elementLocated(bSelector), timeout);
-      const b = await driver.findElement(bSelector);
+    //   await driver.wait(until.elementLocated(By.id('included-2')), timeout);
+    //   const b = await driver.findElement(bSelector);
 
-      const aText = await a.getText();
-      const bText = await b.getText();
+    //   const aText = await a.getText();
+    //   const bText = await b.getText();
 
-      expect(aText).toBe('this text is included');
-      expect(bText).toBe('this text overwrote what was just there');
-    });
+    //   expect(aText).toBe('this text is included');
+    //   expect(bText).toBe('this text overwrote what was just there');
+    // });
 
-    it('includes lazy', async () => {
-      await driver.get('http://localhost:8080/static/lazy-extension/');
-      const aSelector = By.id('included-3');
+    // it('includes basic async case', async () => {
+    //   await driver.get('http://localhost:8080/static/basic-async/');
+    //   const aSelector = By.id('included-1');
+    //   const bSelector = By.id('included-2');
 
-      await driver.wait(until.elementLocated(aSelector), timeout);
-      const a = await driver.findElement(aSelector);
+    //   await driver.wait(until.elementLocated(aSelector), timeout);
+    //   const a = await driver.findElement(aSelector);
 
-      const aText = await a.getText();
+    //   await driver.wait(until.elementLocated(bSelector), timeout);
+    //   const b = await driver.findElement(bSelector);
 
-      expect(aText).toBe('this text is included 3');
-    });
+    //   const aText = await a.getText();
+    //   const bText = await b.getText();
 
-    it('includes fragment with extraction', async () => {
-      await driver.get('http://localhost:8080/static/fragment-extraction/');
-      const aSelector = By.id('a');
+    //   expect(aText).toBe('this text is included');
+    //   expect(bText).toBe('this text overwrote what was just there');
+    // });
 
-      await driver.wait(until.elementLocated(aSelector), timeout);
-      const a = await driver.findElement(aSelector);
+    // it('includes lazy', async () => {
+    //   await driver.get('http://localhost:8080/static/lazy-extension/');
+    //   const aSelector = By.id('included-3');
 
-      const aText = await a.getText();
+    //   await driver.wait(until.elementLocated(aSelector), timeout);
+    //   const a = await driver.findElement(aSelector);
 
-      expect(aText).toBe('Paragraph in fragment');
-    });
+    //   const aText = await a.getText();
 
-    it('does not modify the page if no includes', async () => {
-      await driver.get('http://localhost:8080/static/none/');
-      const aSelector = By.id('a');
+    //   expect(aText).toBe('this text is included 3');
+    // });
 
-      await driver.wait(until.elementLocated(aSelector), timeout);
-      const a = await driver.findElement(aSelector);
+    // it('includes fragment with extraction', async () => {
+    //   await driver.get('http://localhost:8080/static/fragment-extraction/');
+    //   const aSelector = By.id('a');
 
-      const aText = await a.getText();
+    //   await driver.wait(until.elementLocated(aSelector), timeout);
+    //   const a = await driver.findElement(aSelector);
 
-      expect(aText).toBe('1st para');
-    });
+    //   const aText = await a.getText();
 
-    it('does not allow recursion', async () => {
-      await driver.get('http://localhost:8080/static/recursion-not-allowed/');
+    //   expect(aText).toBe('Paragraph in fragment');
+    // });
 
-      const aSelector = By.id('a');
+    // it('does not modify the page if no includes', async () => {
+    //   await driver.get('http://localhost:8080/static/none/');
+    //   const aSelector = By.id('a');
 
-      await driver.wait(until.elementLocated(aSelector), timeout);
-      const a = await driver.findElement(aSelector);
+    //   await driver.wait(until.elementLocated(aSelector), timeout);
+    //   const a = await driver.findElement(aSelector);
 
-      const aText = await a.getText();
+    //   const aText = await a.getText();
 
-      expect(aText).toBe('1');
-    });
+    //   expect(aText).toBe('1st para');
+    // });
 
-    it('navigates', async () => {
-      await driver.get('http://localhost:8080/static/navigate-extension/');
+    // it('does not allow recursion', async () => {
+    //   await driver.get('http://localhost:8080/static/recursion-not-allowed/');
 
-      await driver.wait(until.elementLocated(By.id('a')), timeout);
-      await driver.findElement(By.css('#a .link')).click();
+    //   const aSelector = By.id('a');
 
-      await driver.wait(until.elementLocated(By.id('b')), timeout);
-      await driver.findElement(By.css('#b .link')).click();
+    //   await driver.wait(until.elementLocated(aSelector), timeout);
+    //   const a = await driver.findElement(aSelector);
 
-      const cSelector = By.id('c');
-      await driver.wait(until.elementLocated(cSelector), timeout);
+    //   const aText = await a.getText();
 
-      const c = await driver.findElement(cSelector);
+    //   expect(aText).toBe('1');
+    // });
 
-      const cText = await c.getText();
+    // it('navigates', async () => {
+    //   await driver.get('http://localhost:8080/static/navigate-extension/');
 
-      expect(cText).toBe('This is the last box. Goodbye.');
-    });
+    //   await driver.wait(until.elementLocated(By.id('a')), timeout);
+    //   await driver.findElement(By.css('#a .link')).click();
 
-    it('does perform inclusion of src when predicate function succeeds', async () => {
-      await driver.get('http://localhost:8080/static/when/when-pass-use-src.html');
+    //   await driver.wait(until.elementLocated(By.id('b')), timeout);
+    //   await driver.findElement(By.css('#b .link')).click();
 
-      const a = await driver.findElement(By.id('when-included')).getText();
+    //   const cSelector = By.id('c');
+    //   await driver.wait(until.elementLocated(cSelector), timeout);
 
-      expect(a.trim()).toBe('when - this text is included');
-    });
+    //   const c = await driver.findElement(cSelector);
 
-    it('does not perform inclusion of src when predicate function fails', async () => {
-      await driver.get('http://localhost:8080/static/when/when-fail.html');
+    //   const cText = await c.getText();
 
-      try {
-        await driver.findElement(By.id('when-included'))
-      } catch (error) {
-        expect(error.name).toBe('NoSuchElementError');
-      }
-    });
+    //   expect(cText).toBe('This is the last box. Goodbye.');
+    // });
 
-    it('does not perform inclusion of when-false-src when predicate function fails', async () => {
-      await driver.get('http://localhost:8080/static/when/when-fail.html');
+    // it('does perform inclusion of src when predicate function succeeds', async () => {
+    //   await driver.get('http://localhost:8080/static/when/when-pass-use-src.html');
 
-      try {
-        await driver.findElement(By.id('when-false-src-included'))
-      } catch (error) {
-        expect(error.name).toBe('NoSuchElementError');
-      }
-    });
+    //   const a = await driver.findElement(By.id('when-included')).getText();
 
-    it('does perform inclusion of when-false-src when predicate function fails', async () => {
-      await driver.get('http://localhost:8080/static/when/when-fail-if-when-false-src.html');
+    //   expect(a.trim()).toBe('when - this text is included');
+    // });
 
-      try {
-        await driver.findElement(By.id('when-included'))
-      } catch (error) {
-        expect(error.name).toBe('NoSuchElementError');
+    // it('does not perform inclusion of src when predicate function fails', async () => {
+    //   await driver.get('http://localhost:8080/static/when/when-fail.html');
 
-        const a = await driver.findElement(By.id('when-false-src-included')).getText();
+    //   try {
+    //     await driver.findElement(By.id('when-included'))
+    //   } catch (error) {
+    //     expect(error.name).toBe('NoSuchElementError');
+    //   }
+    // });
+
+    // it('does not perform inclusion of when-false-src when predicate function fails', async () => {
+    //   await driver.get('http://localhost:8080/static/when/when-fail.html');
+
+    //   try {
+    //     await driver.findElement(By.id('when-false-src-included'))
+    //   } catch (error) {
+    //     expect(error.name).toBe('NoSuchElementError');
+    //   }
+    // });
+
+    // it('does perform inclusion of when-false-src when predicate function fails', async () => {
+    //   await driver.get('http://localhost:8080/static/when/when-fail-if-when-false-src.html');
+
+    //   try {
+    //     await driver.findElement(By.id('when-included'))
+    //   } catch (error) {
+    //     expect(error.name).toBe('NoSuchElementError');
+
+    //     const a = await driver.findElement(By.id('when-false-src-included')).getText();
         
-        expect(a.trim()).toBe('when-false-src - this text is included');
-      }
-    });
+    //     expect(a.trim()).toBe('when-false-src - this text is included');
+    //   }
+    // });
 
-    it('uses alt attribute when forcing a 404', async () => {
-      await driver.get('http://localhost:8080/static/alt/alt.html');
+    // it('uses alt attribute when forcing a 404', async () => {
+    //   await driver.get('http://localhost:8080/static/alt/alt.html');
 
-      try {
-        await driver.findElement(By.id('default-included'))
-      } catch (error) {
-        expect(error.name).toBe('NoSuchElementError');
+    //   try {
+    //     await driver.findElement(By.id('default-included'))
+    //   } catch (error) {
+    //     expect(error.name).toBe('NoSuchElementError');
 
-        const cSelector = By.id('alt-included');
-        await driver.wait(until.elementLocated(cSelector), timeout);
+    //     const cSelector = By.id('alt-included');
+    //     await driver.wait(until.elementLocated(cSelector), timeout);
     
-        const c = await driver.findElement(cSelector);
-        const cText = await c.getText();
+    //     const c = await driver.findElement(cSelector);
+    //     const cText = await c.getText();
 
-        expect(cText).toBe('alt - this text is included');
-      }
-    });
+    //     expect(cText).toBe('alt - this text is included');
+    //   }
+    // });
 
-    it('does not perform inclusion when forcing a 404 and no alt attribute is present', async () => {
-      await driver.get('http://localhost:8080/static/alt/no-alt.html');
+    // it('does not perform inclusion when forcing a 404 and no alt attribute is present', async () => {
+    //   await driver.get('http://localhost:8080/static/alt/no-alt.html');
 
-      try {
-        await driver.findElement(By.id('alt-included'))
-      } catch (error) {
-        expect(error.name).toBe('NoSuchElementError');
-      }
-    });
+    //   try {
+    //     await driver.findElement(By.id('alt-included'))
+    //   } catch (error) {
+    //     expect(error.name).toBe('NoSuchElementError');
+    //   }
+    // });
 
-    it('does not perform inclusion when predicate fails, no when-false-src and forcing a 404 in alt src', async () => {
-      await driver.get('http://localhost:8080/static/alt/when-fail-no-when-false-src-alt-error.html');
+    // it('does not perform inclusion when predicate fails, no when-false-src and forcing a 404 in alt src', async () => {
+    //   await driver.get('http://localhost:8080/static/alt/when-fail-no-when-false-src-alt-error.html');
 
-      try {
-        await driver.findElement(By.id('alt-included'))
-      } catch (error) {
-        expect(error.name).toBe('NoSuchElementError');
-      }
-    });
+    //   try {
+    //     await driver.findElement(By.id('alt-included'))
+    //   } catch (error) {
+    //     expect(error.name).toBe('NoSuchElementError');
+    //   }
+    // });
 
-    it('does perform inclusion when predicate fails, no when-false-src and using a valid alt src', async () => {
-      await driver.get('http://localhost:8080/static/alt/when-fail-no-when-false-src-alt-pass.html');
+    // it('does perform inclusion when predicate fails, no when-false-src and using a valid alt src', async () => {
+    //   await driver.get('http://localhost:8080/static/alt/when-fail-no-when-false-src-alt-pass.html');
 
-      try {
-        await driver.findElement(By.id('default-included'))
-      } catch (error) {
-        expect(error.name).toBe('NoSuchElementError');
+    //   try {
+    //     await driver.findElement(By.id('default-included'))
+    //   } catch (error) {
+    //     expect(error.name).toBe('NoSuchElementError');
 
-        const cSelector = By.id('alt-included');
-        await driver.wait(until.elementLocated(cSelector), timeout);
+    //     const cSelector = By.id('alt-included');
+    //     await driver.wait(until.elementLocated(cSelector), timeout);
     
-        const c = await driver.findElement(cSelector);
-        const cText = await c.getText();
+    //     const c = await driver.findElement(cSelector);
+    //     const cText = await c.getText();
 
-        expect(cText).toBe('alt - this text is included');
-      }
-    });
+    //     expect(cText).toBe('alt - this text is included');
+    //   }
+    // });
 
-    it('does not perform inclusion when predicate fails, when-false-src fails and alt src fails', async () => {
-      await driver.get('http://localhost:8080/static/alt/when-fail-when-false-src-fail-alt-error.html');
+    // it('does not perform inclusion when predicate fails, when-false-src fails and alt src fails', async () => {
+    //   await driver.get('http://localhost:8080/static/alt/when-fail-when-false-src-fail-alt-error.html');
 
-      try {
-        await driver.findElement(By.id('alt-included'))
-      } catch (error) {
-        expect(error.name).toBe('NoSuchElementError');
-      }
-    });
+    //   try {
+    //     await driver.findElement(By.id('alt-included'))
+    //   } catch (error) {
+    //     expect(error.name).toBe('NoSuchElementError');
+    //   }
+    // });
 
-    it('does perform inclusion when predicate fails, when-false-src fails and using a valid alt src', async () => {
-      await driver.get('http://localhost:8080/static/alt/when-fail-when-false-src-fail-alt-pass.html');
+    // it('does perform inclusion when predicate fails, when-false-src fails and using a valid alt src', async () => {
+    //   await driver.get('http://localhost:8080/static/alt/when-fail-when-false-src-fail-alt-pass.html');
 
-      try {
-        await driver.findElement(By.id('default-included'))
-      } catch (error) {
-        expect(error.name).toBe('NoSuchElementError');
+    //   try {
+    //     await driver.findElement(By.id('default-included'))
+    //   } catch (error) {
+    //     expect(error.name).toBe('NoSuchElementError');
 
-        const cSelector = By.id('alt-included');
-        await driver.wait(until.elementLocated(cSelector), timeout);
+    //     const cSelector = By.id('alt-included');
+    //     await driver.wait(until.elementLocated(cSelector), timeout);
     
-        const c = await driver.findElement(cSelector);
-        const cText = await c.getText();
+    //     const c = await driver.findElement(cSelector);
+    //     const cText = await c.getText();
 
-        expect(cText).toBe('alt - this text is included');
-      }
-    });
+    //     expect(cText).toBe('alt - this text is included');
+    //   }
+    // });
 
-    it('does not perform inclusion when predicate is met, no when-false-src and alt src fails', async () => {
-      await driver.get('http://localhost:8080/static/alt/when-pass-no-when-false-src-alt-error.html');
+    // it('does not perform inclusion when predicate is met, no when-false-src and alt src fails', async () => {
+    //   await driver.get('http://localhost:8080/static/alt/when-pass-no-when-false-src-alt-error.html');
 
-      try {
-        await driver.findElement(By.id('alt-included'))
-      } catch (error) {
-        expect(error.name).toBe('NoSuchElementError');
-      }
-    });
+    //   try {
+    //     await driver.findElement(By.id('alt-included'))
+    //   } catch (error) {
+    //     expect(error.name).toBe('NoSuchElementError');
+    //   }
+    // });
 
-    it('does perform inclusion when predicate is met, no when-false-src and using a valid alt src', async () => {
-      await driver.get('http://localhost:8080/static/alt/when-pass-no-when-false-src-alt-pass.html');
+    // it('does perform inclusion when predicate is met, no when-false-src and using a valid alt src', async () => {
+    //   await driver.get('http://localhost:8080/static/alt/when-pass-no-when-false-src-alt-pass.html');
 
-      try {
-        await driver.findElement(By.id('default-included'))
-      } catch (error) {
-        expect(error.name).toBe('NoSuchElementError');
+    //   try {
+    //     await driver.findElement(By.id('default-included'))
+    //   } catch (error) {
+    //     expect(error.name).toBe('NoSuchElementError');
 
-        const cSelector = By.id('alt-included');
-        await driver.wait(until.elementLocated(cSelector), timeout);
+    //     const cSelector = By.id('alt-included');
+    //     await driver.wait(until.elementLocated(cSelector), timeout);
     
-        const c = await driver.findElement(cSelector);
-        const cText = await c.getText();
+    //     const c = await driver.findElement(cSelector);
+    //     const cText = await c.getText();
 
-        expect(cText).toBe('alt - this text is included');
-      }
-    });
+    //     expect(cText).toBe('alt - this text is included');
+    //   }
+    // });
 
-    it('does not perform inclusion when predicate is met, when-false-src fails and alt src fails', async () => {
-      await driver.get('http://localhost:8080/static/alt/when-pass-when-false-src-fail-alt-error.html');
+    // it('does not perform inclusion when predicate is met, when-false-src fails and alt src fails', async () => {
+    //   await driver.get('http://localhost:8080/static/alt/when-pass-when-false-src-fail-alt-error.html');
 
-      try {
-        await driver.findElement(By.id('alt-included'))
-      } catch (error) {
-        expect(error.name).toBe('NoSuchElementError');
-      }
-    });
+    //   try {
+    //     await driver.findElement(By.id('alt-included'))
+    //   } catch (error) {
+    //     expect(error.name).toBe('NoSuchElementError');
+    //   }
+    // });
 
-    it('does perform inclusion when predicate is met, when-false-src fails and using a valid alt src', async () => {
-      await driver.get('http://localhost:8080/static/alt/when-pass-when-false-src-fail-alt-pass.html');
+    // it('does perform inclusion when predicate is met, when-false-src fails and using a valid alt src', async () => {
+    //   await driver.get('http://localhost:8080/static/alt/when-pass-when-false-src-fail-alt-pass.html');
 
-      try {
-        await driver.findElement(By.id('default-included'))
-      } catch (error) {
-        expect(error.name).toBe('NoSuchElementError');
+    //   try {
+    //     await driver.findElement(By.id('default-included'))
+    //   } catch (error) {
+    //     expect(error.name).toBe('NoSuchElementError');
 
-        const cSelector = By.id('alt-included');
-        await driver.wait(until.elementLocated(cSelector), timeout);
+    //     const cSelector = By.id('alt-included');
+    //     await driver.wait(until.elementLocated(cSelector), timeout);
     
-        const c = await driver.findElement(cSelector);
-        const cText = await c.getText();
+    //     const c = await driver.findElement(cSelector);
+    //     const cText = await c.getText();
 
-        expect(cText).toBe('alt - this text is included');
-      }
-    });
+    //     expect(cText).toBe('alt - this text is included');
+    //   }
+    // });
 
-    if (browser.browserName !== 'MicrosoftEdge' && browser.platform !== 'Windows 10') {
-      it('loads small fragment for small viewport', async () => {
-        const viewport = driver.manage().window();
-        await viewport.setSize(480, 800); // width, height
-                await driver.get('http://localhost:8080/static/media/');
+    // if (browser.browserName !== 'MicrosoftEdge' && browser.platform !== 'Windows 10') {
+    //   it('loads small fragment for small viewport', async () => {
+    //     const viewport = driver.manage().window();
+    //     await viewport.setSize(480, 800); // width, height
+    //             await driver.get('http://localhost:8080/static/media/');
 
-        const a = await driver.findElement(By.id('a')).getText();
+    //     const a = await driver.findElement(By.id('a')).getText();
 
-        expect(a.trim()).toBe('Small viewport');
-      });
-    }
+    //     expect(a.trim()).toBe('Small viewport');
+    //   });
+    // }
 
     after(done => {
       if (log && browser.browserName === 'chrome') {
